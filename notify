@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# "notify", a simple wrapper that beeps when your command completes!
+
+# Run the user's specified command
+$@
+# Echo the ASCII BEL character
+echo -ne '\007'
