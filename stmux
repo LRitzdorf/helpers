@@ -1,26 +1,57 @@
 #!/bin/sh
 
-# tmux shared session wrapper script, by Lucas Ritzdorf (v2)
+# tmux shared session wrapper script, by Lucas Ritzdorf (v3)
 # Manages socket stuff, to make session sharing easier
 
+# Configuration variables
+# You can change these!
+stmux_dir=/tmp/tmux-shared
+
 # Check arguments
-if [ -z "$1" ]; then
-    echo "Please pass a session name as an argument."
-    exit 1
+username=$(whoami)
+if [ -z "$1" ] ; then
+    socket=$username
+else
+    socket=$1
 fi
-if [ -n "$2" ]; then
+session=$socket
+if [ -n "$2" ] ; then
     echo "Extra arguments detected; ignoring..."
 fi
 
-# Start tmux using a shared socket
-if ! [ -d /tmp/tmux-shared ]; then
-    mkdir /tmp/tmux-shared
-    chmod 770 /tmp/tmux-shared
+# Create a shared folder for tmux sessions, if it doesn't exist already
+if ! [ -d $stmux_dir ] ; then
+    mkdir $stmux_dir
+    chmod g+ws $stmux_dir
 fi
-tmux -S /tmp/tmux-shared/$1 new-session -A -s $1
+
+# Start tmux using a shared socket
+if [ -S $stmux_dir/$socket ] ; then
+    # The socket already exists...
+    if tmux -S $stmux_dir/$socket has-session -t $session ; then
+        # ...and has the desired session...
+        if [ $session = $username ] ; then
+            # ...and is our session; connect to it
+            echo "Existing session found, connecting directly..."
+            tmux -S $stmux_dir/$socket attach -t $session
+        else
+            # ...and is not already our session; link to the existing session with a new one
+            echo "Creating new session to track existing target session..."
+            tmux -S $stmux_dir/$socket new-session -d -t $session -s $username \; set-option -q -t $username destroy-unattached
+        fi
+    else
+        # ...but does not contain the target session; create it
+        echo "Creating new session in existing socket..."
+        tmux -S $stmux_dir/$socket new-session -s $session
+    fi
+else
+    # The socket does not yet exist; create it and start a session
+    echo "Creating socket..."
+    tmux -S $stmux_dir/$socket new-session -s $session
+fi
 
 # After tmux exits, check if socket is still in use...
-if [ -e /tmp/tmux-shared/$1 ] && ! tmux -S /tmp/tmux-shared/$1 ls &> /dev/null; then
+if [ -e $stmux_dir/$socket ] && ! tmux -S $tmux_dir/$socket ls &> /dev/null ; then
     # ...and if not, delete it
-    rm /tmp/tmux-shared/$1
+    rm $stmux_dir/$socket &> /dev/null
 fi
