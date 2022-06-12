@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# tmux shared session wrapper script, by Lucas Ritzdorf (v2)
+# Manages socket stuff, to make session sharing easier
+
+# Check arguments
+if [ -z "$1" ]; then
+    echo "Please pass a session name as an argument."
+    exit 1
+fi
+if [ -n "$2" ]; then
+    echo "Extra arguments detected; ignoring..."
+fi
+
+# Start tmux using a shared socket
+if ! [ -d /tmp/tmux-shared ]; then
+    mkdir /tmp/tmux-shared
+    chmod 770 /tmp/tmux-shared
+fi
+tmux -S /tmp/tmux-shared/$1 new-session -A -s $1
+
+# After tmux exits, check if socket is still in use...
+if [ -e /tmp/tmux-shared/$1 ] && ! tmux -S /tmp/tmux-shared/$1 ls &> /dev/null; then
+    # ...and if not, delete it
+    rm /tmp/tmux-shared/$1
+fi
