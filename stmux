@@ -1,7 +1,11 @@
 #!/bin/sh
 
-# tmux shared session wrapper script, by Lucas Ritzdorf (v3)
+# tmux shared session wrapper script, by Lucas Ritzdorf (v3.1)
 # Manages socket stuff, to make session sharing easier
+
+# To allow session sharing based on a group other than users' primary group,
+# ensure that users' shell sessions "export STMUX_GROUP=whatever". Their
+# sessions will then be joinable by anyone else in that group.
 
 # Configuration variables
 # You can change these!
@@ -22,6 +26,7 @@ fi
 # Create a shared folder for tmux sessions, if it doesn't exist already
 if ! [ -d $stmux_dir ] ; then
     mkdir $stmux_dir
+    chown "${STMUX_GROUP:-}" $stmux_dir
     chmod g+ws $stmux_dir
 fi
 
