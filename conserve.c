@@ -106,5 +106,6 @@ int main(int argc, char** argv) {
 	}
 
 	// Apply desired mode
+	printf("%d\n", mode);
 	exit(!set_mode(TARGET, mode));
 }
