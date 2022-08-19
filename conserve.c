@@ -57,6 +57,10 @@ bool get_mode(const char* filename) {
 
 bool set_mode(const char* filename, const bool mode) {
 	FILE* fout = fopen(filename, "w");
+	if (fout == NULL) {
+		fprintf(stderr, "Failed to open \"%s\" for writing.\nAre you root?\n", filename);
+		return false;
+	}
 	bool success = fputc(mode ? '1' : '0', fout);
 	fclose(fout);
 	return success;
