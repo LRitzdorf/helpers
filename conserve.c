@@ -49,15 +49,17 @@ bool string_in(char* target, char** options, int numopts) {
 }
 
 bool get_mode(const char* filename) {
-	// TODO
-	printf("Would read from %s\n", filename);
-	return true;
+	FILE* fin = fopen(filename, "r");
+	bool result = fgetc(fin) == '1';
+	fclose(fin);
+	return result;
 }
 
 bool set_mode(const char* filename, const bool mode) {
-	// TODO
-	printf("Would write %d to %s\n", mode, filename);
-	return true;
+	FILE* fout = fopen(filename, "w");
+	bool success = fputc(mode ? '1' : '0', fout);
+	fclose(fout);
+	return success;
 }
 
 
