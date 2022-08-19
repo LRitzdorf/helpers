@@ -1,5 +1,5 @@
 .DEFAULT: all
-.PHONY: all notify stmux clean
+.PHONY: all permissions notify stmux clean
 
 CFLAGS = -Wall
 LDFLAGS = 
@@ -10,6 +10,10 @@ OBJ = $(SRC:.c=.o)
 
 
 all: conserve notify stmux
+
+permissions: conserve
+	chown root:root $<
+	chmod u+s $<
 
 conserve: conserve.o
 	$(CC) $(LDFLAGS) $< -o $@
