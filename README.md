@@ -5,8 +5,12 @@ helpful to others.
 
 ## Current inventory
 
-- `conserve`: A script for managing battery conservation mode on supported
+- `conserve`: A program for managing battery conservation mode on supported
   Lenovo laptops.
+  **NEW**: `conserve` is now a C program, rather than a shell script! This
+  allows the SUID bit to be set, removing the need for the eternally annoying
+  `sudo conserve on` (and the accompanying password prompt or sudoers file
+  `NOPASSWD` exception).
 - `notify`: A (very) simple wrapper script that executes a command, then rings
   your terminal bell when it finishes. Potentially helpful for long-running
   commands, like installers.
