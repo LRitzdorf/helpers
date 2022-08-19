@@ -12,6 +12,7 @@ OBJ = $(SRC:.c=.o)
 all: conserve notify stmux
 
 permissions: conserve
+	strip $<
 	chown root:root $<
 	chmod u+s $<
 
