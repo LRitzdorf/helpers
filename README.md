@@ -17,3 +17,6 @@ helpful to others.
 - `stmux`: A semi-intelligent script to manage shared `tmux` sessions for
   multiple users. Creates sockets in a known, accessible location, and searches
   for existing sessions by name before creating a new one.
+- `nvim-hosted`: A script to start Neovim in a "host" terminal. This is
+  required for Neovim to display itself, and can simplify things like window
+  manager commands.

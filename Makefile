@@ -25,6 +25,9 @@ notify:
 stmux:
 	@echo "\"stmux\" is a shell script, and does not require compilation."
 
+nvim-hosted:
+	@echo "\"nvim-hosted\" is a shell script, and does not require compilation."
+
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $(<:.c=.o)
 

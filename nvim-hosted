@@ -1,0 +1,7 @@
+#!/bin/sh
+# Neovim needs a terminal to display itself, and thus can't be started directly
+# by, for example, a keybind in i3. This script simply launches a terminal to
+# contain a Neovim instance.
+
+nvim_host=kitty
+exec "$nvim_host" nvim $@
