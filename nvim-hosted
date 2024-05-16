@@ -4,4 +4,4 @@
 # contain a Neovim instance.
 
 nvim_host=kitty
-exec "$nvim_host" nvim $@
+exec "$nvim_host" nvim "$@"
