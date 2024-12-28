@@ -3,5 +3,9 @@
 # by, for example, a keybind in i3. This script simply launches a terminal to
 # contain a Neovim instance.
 
-nvim_host=kitty
-exec "$nvim_host" nvim "$@"
+# NOTE: We assume Kitty as a reasonable default terminal emulator. To override
+# this, set $TERMINAL in your environment, e.g. for Hyprland:
+# $terminal = ghostty
+# env = TERMINAL,$terminal
+
+exec "${TERMINAL:-kitty}" -e nvim "$@"
