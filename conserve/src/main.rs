@@ -1,17 +1,26 @@
 use clap::{Command, command};
+use std::path::Path;
+use std::fs::File;
+use std::io::{Read, Write};
 
 
 // NOTE: Set your "battery conservation mode" file here:
 const TARGET: &str = "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode";
 
 
-fn get_mode() -> Result<bool, std::io::Error> {
-    println!("get_state() called! Would read from {TARGET}");
-    Ok(true)
+fn get_mode(f: &mut File) -> std::io::Result<bool> {
+    let mut buf = [0u8; 2];
+    f.read_exact(&mut buf)?;
+    match &buf {
+        b"0\n" => Ok(false),
+        b"1\n" => Ok(true),
+        _      => panic!("Unexpected conservation mode '{}'", String::from_utf8_lossy(&buf)),
+    }
 }
 
-fn set_mode(state: bool) -> Result<bool, std::io::Error> {
-    println!("set_state({state}) called! Would write to {TARGET}");
+fn set_mode(f: &mut File, state: bool) -> std::io::Result<bool> {
+    let buf = [b'0' + u8::from(state), b'\n'];
+    f.write_all(&buf)?;
     Ok(state)
 }
 
@@ -47,11 +56,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .infer_subcommands(true)
         .get_matches();
 
+    let p = Path::new(TARGET);
+    let mut f = match File::options().read(true).write(true).open(p) {
+        Err(why) => panic!("Couldn't open conservation control file '{}': {}", p.display(), why),
+        Ok(file) => file,
+    };
+
     match m.subcommand() {
-        Some(("enable",  _))     => { println!("{:#?}", set_mode(true)); }
-        Some(("disable", _))     => { println!("{:#?}", set_mode(false)); }
-        Some(("toggle",  _))     => { println!("{:#?}", set_mode(!get_mode()?)); }
-        Some(("query",   _)) | _ => { println!("{:#?}", get_mode()?); }
+        Some(("enable",  _))  => { println!("{}", set_mode(&mut f, true)?); }
+        Some(("disable", _))  => { println!("{}", set_mode(&mut f, false)?); }
+        Some(("toggle",  _))  => { let mode = get_mode(&mut f)?; println!("{}", set_mode(&mut f, !mode)?); }
+        _                     => { println!("{}", get_mode(&mut f)?); }
     }
     Ok(())
 }
