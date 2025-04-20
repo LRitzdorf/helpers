@@ -1,13 +1,6 @@
 .DEFAULT: all
 .PHONY: all permissions notify stmux clean
 
-CFLAGS = -Wall
-LDFLAGS = 
-
-HEADERS = $(wildcard *.h)
-SRC = $(wildcard *.c)
-OBJ = $(SRC:.c=.o)
-
 
 all: conserve notify stmux
 
@@ -16,8 +9,9 @@ permissions: conserve
 	chown root:root $<
 	chmod u+s $<
 
-conserve: conserve.o
-	$(CC) $(LDFLAGS) $< -o $@
+conserve: conserve-rs/src/*
+	cd $@-rs && cargo build --release
+	cp $@-rs/target/release/$@ ./
 
 notify:
 	@echo "\"notify\" is a shell script, and does not require compilation."
@@ -28,8 +22,6 @@ stmux:
 nvim-hosted:
 	@echo "\"nvim-hosted\" is a shell script, and does not require compilation."
 
-%.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -c $< -o $(<:.c=.o)
-
 clean:
-	rm *.o
+	cd conserve-rs && cargo clean
+	rm -f conserve
