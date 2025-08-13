@@ -1,8 +1,8 @@
 .DEFAULT: all
-.PHONY: all permissions notify stmux clean
+.PHONY: all permissions notify nvim-hosted stmux clean
 
 
-all: conserve notify stmux
+all: conserve notify nvim-hosted stmux
 
 permissions: conserve
 	strip $<
