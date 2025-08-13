@@ -21,7 +21,7 @@ package() {
     cd "${pkgname}-${pkgver}"
     install -D -t "${pkgdir}/usr/bin" notify nvim-hosted stmux
     # `conserve` must be setuid root to access battery controls
-    install -D -t "${pkgdir}/usr/bin" conserve -o root -m u+s
+    install -D -t "${pkgdir}/usr/bin" conserve -o root -m 4755
     # And the license
     install -D -t "${pkgdir}/usr/share/licenses/${pkgname}" LICENSE
 }
