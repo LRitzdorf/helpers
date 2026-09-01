@@ -1,4 +1,4 @@
-use clap::{Command, command};
+use clap::{Parser, Subcommand};
 use std::path::Path;
 use std::fs::File;
 use std::io::{self, prelude::*};
@@ -28,36 +28,53 @@ fn set_mode(f: &mut File, state: bool) -> io::Result<bool> {
 }
 
 
+#[derive(Parser)]
+#[command(version, about,
+    infer_subcommands = true,
+)]
+struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Display the current battery conservation status
+    #[command(
+        visible_alias = "status",
+        visible_alias = "?",
+    )]
+    Query {},
+
+    /// Enable battery conservation mode
+    #[command(
+        visible_alias = "true",
+        visible_alias = "on",
+        visible_alias = "yes",
+        visible_alias = "1",
+    )]
+    Enable {},
+
+    /// Disable battery conservation mode
+    #[command(
+        visible_alias = "false",
+        visible_alias = "off",
+        visible_alias = "no",
+        visible_alias = "0",
+    )]
+    Disable {},
+
+    /// Toggle battery conservation mode
+    #[command(
+        visible_alias = "switch",
+        visible_alias = "-1",
+    )]
+    Toggle {},
+}
+
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    include_str!("../Cargo.toml");  // Recompile when Cargo.toml changes...
-    let m = command!()              // ...so command details here are updated
-        .author("LRitzdorf")
-        .subcommand(Command::new("query")
-            .about("Display the current battery conservation status")
-            .visible_alias("status")
-            .visible_alias("?")
-        )
-        .subcommand(Command::new("enable")
-            .about("Enable battery conservation mode")
-            .visible_alias("true")
-            .visible_alias("on")
-            .visible_alias("yes")
-            .visible_alias("1")
-        )
-        .subcommand(Command::new("disable")
-            .about("Disable battery conservation mode")
-            .visible_alias("false")
-            .visible_alias("off")
-            .visible_alias("no")
-            .visible_alias("0")
-        )
-        .subcommand(Command::new("toggle")
-            .about("Toggle battery conservation mode")
-            .visible_alias("switch")
-            .visible_alias("-1")
-        )
-        .infer_subcommands(true)
-        .get_matches();
+    let cli = Cli::parse();
 
     let p = Path::new(TARGET);
     let mut f = match File::options().read(true).write(true).open(p) {
@@ -65,11 +82,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(file) => file,
     };
 
-    let result = match m.subcommand() {
-        Some(("enable",  _))  => { set_mode(&mut f, true)? }
-        Some(("disable", _))  => { set_mode(&mut f, false)? }
-        Some(("toggle",  _))  => { let mode = get_mode(&mut f)?; set_mode(&mut f, !mode)? }
-        _                     => { get_mode(&mut f)? }
+    let result = match cli.command {
+        Some(Commands::Enable {}) => { set_mode(&mut f, true)? }
+        Some(Commands::Disable{}) => { set_mode(&mut f, false)? }
+        Some(Commands::Toggle {}) => { let mode = get_mode(&mut f)?; set_mode(&mut f, !mode)? }
+        _                         => { get_mode(&mut f)? }
     };
     println!("{}", result);
     Ok(())
